@@ -130,8 +130,11 @@ if __name__ == '__main__':
                                     vk.messages.send(user_id=107431201, message='> *id{}({} {}) is not in blacklist'.format(user_id, first_name, last_name))
 
         except ReadTimeout as e:
-            log.error(e)
             print('ReadTimeout')
+
+        except ValueError as e:
+            print('ValueError')
+            print(e)
 
         except KeyboardInterrupt:
             sys.exit(0)
