@@ -135,6 +135,10 @@ if __name__ == '__main__':
         except ValueError as e:
             print('ValueError')
             print(e)
+	
+	except Exception as e:
+	    print(e)
+
 
         except KeyboardInterrupt:
             sys.exit(0)
