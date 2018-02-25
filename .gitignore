@@ -3,3 +3,4 @@ config.ini
 log.log
 vk_config.v2.json
 venv/
+last.log

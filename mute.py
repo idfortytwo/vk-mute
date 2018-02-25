@@ -18,9 +18,17 @@ log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
 log_file_url = 'log.log'
 file_handler = logging.FileHandler(log_file_url)
-formatter = logging.Formatter('%(asctime)s %(message)s', '%Y-%m-%d %H:%M:%S')
+formatter = logging.Formatter('%(asctime)s %(message)s', '%b-%d %H:%M:%S')
 file_handler.setFormatter(formatter)
 log.addHandler(file_handler)
+
+last = logging.getLogger('last')
+last.setLevel('INFO')
+last_file_url = 'last.log'
+file_handler = logging.FileHandler(last_file_url)
+formatter = logging.Formatter('%(asctime)s | %(message)s', '%b-%d %H:%M')
+file_handler.setFormatter(formatter)
+last.addHandler(file_handler)
 
 f = 'blacklist'
 try:
@@ -56,21 +64,27 @@ if __name__ == '__main__':
             upload = VkUpload(vk_session)
             longpoll = VkLongPoll(vk_session)
 
-            user = vk.users.get(user_ids=107431201)
+            # user = vk.users.get(user_ids=107431201)
 
             for event in longpoll.listen():
                 if event.type == VkEventType.MESSAGE_NEW and event.from_chat:
 
                     user_id = int(event.user_id)
                     if (blacklist.__contains__(user_id)):
+                        user = vk.users.get(user_ids=user_id)[0]
+                        chat_id = event.chat_id
+                        # chat_title = vk.messages.getChat(chat_id=chat_id)['title']
+                        # chat_title_short = (chat_title[:10] + '...') if len(chat_title) > 13 else chat_title
 
-                        log.info('chat:{} id:{} msg:{}'.format(event.chat_id, event.user_id, event.text))
+                        log.info('{} | {} {} | {}'.format(chat_id, user['first_name'], user['last_name'], event.text))
+                        last.info('{} *id{}({} {}) | {}'.format(chat_id, user_id, user['first_name'], user['last_name'], event.text))
+
                         vk.messages.delete(message_ids=event.raw[1])
 
                 if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.raw[3] == 107431201:
                     command = str(event.text).split()
-                    if command[0] == 'mute':
 
+                    if command[0] == 'mute':
                         if len(command) == 2:
                             if command[1] == 'list':
                                 user_ids = ''
@@ -88,6 +102,21 @@ if __name__ == '__main__':
 
                                 vk.messages.send(user_id=107431201, message=message)
 
+                            if command[1] == 'log':
+                                lastFile = open('last.log','r')
+                                last_file = lastFile.readlines()
+                                open('last.log', 'w').close()
+                                lastFile.close()
+
+                                last_str = ''
+                                for line in last_file:
+                                    last_str += line
+                                if last_str == '':
+                                    last_str = 'empty'
+
+                                vk.messages.send(user_id=107431201, message='> ' + last_str)
+
+
                         elif len(command) == 3:
                             command_id = command[2]
 
@@ -102,7 +131,7 @@ if __name__ == '__main__':
                                     with open('blacklist', 'wb') as file:
                                         pickle.dump(blacklist, file)
 
-                                    msg = '> added *id{}({} {}) {}'.format(user_id, first_name, last_name, user_id)
+                                    msg = '> added *id{}({} {})'.format(user_id, first_name, last_name)
                                     vk.messages.send(user_id=107431201, message=msg)
                                     print('added {} {} {}'.format(first_name, last_name, user_id))
 
@@ -129,13 +158,26 @@ if __name__ == '__main__':
                                     print('{} {} {} is not in blacklist'.format(first_name, last_name, user_id))
                                     vk.messages.send(user_id=107431201, message='> *id{}({} {}) is not in blacklist'.format(user_id, first_name, last_name))
 
+                            if command[1] == 'log' and command[2] == 'all':
+                                lastFile = open('log.log','r')
+                                last_file = lastFile.readlines()
+                                lastFile.close()
+
+                                last_str = ''
+                                for line in last_file:
+                                    last_str += line
+                                if last_str == '':
+                                    last_str = 'empty'
+
+                                vk.messages.send(user_id=107431201, message='> ' + last_str)
+
         except ReadTimeout as e:
             print('ReadTimeout')
 
         except ValueError as e:
             print('ValueError')
             print(e)
-	
+
 	except Exception as e:
 	    print(e)
 
