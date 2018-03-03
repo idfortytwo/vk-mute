@@ -76,10 +76,12 @@ if __name__ == '__main__':
                         # chat_title = vk.messages.getChat(chat_id=chat_id)['title']
                         # chat_title_short = (chat_title[:10] + '...') if len(chat_title) > 13 else chat_title
 
-                        log.info('{} | {} {} | {}'.format(chat_id, user['first_name'], user['last_name'], event.text))
-                        last.info('{} *id{}({} {}) | {}'.format(chat_id, user_id, user['first_name'], user['last_name'], event.text))
-
                         vk.messages.delete(message_ids=event.raw[1])
+
+                        if event.text != '':
+                            log.info('{} | {} {} | {}'.format(chat_id, user['first_name'], user['last_name'], event.text))
+                            last.info('{} *id{}({} {}) | {}'.format(chat_id, user_id, user['first_name'], user['last_name'], event.text))
+
 
                 if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.raw[3] == 107431201:
                     command = str(event.text).split()
