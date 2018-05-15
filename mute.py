@@ -81,7 +81,7 @@ if __name__ == '__main__':
                         if event.text != '':
                             log.info('{} | {} {} | {}'.format(chat_id, user['first_name'], user['last_name'], event.text))
                             last.info('{} *id{}({} {}) | {}'.format(chat_id, user_id, user['first_name'], user['last_name'], event.text))
-
+			    print('{} {}: {}'.format(user['first_name'], user['last_name'], event.text))
 
                 if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.raw[3] == 107431201:
                     command = str(event.text).split()
